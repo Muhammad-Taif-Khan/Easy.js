@@ -1,7 +1,3 @@
-/*
-copyright (c) 2020, all rights reserved.
-1) you are not allowed to change or copy the code for any commercial use personal use.
-*/
 //define variables
 let toRGB,
     random,
