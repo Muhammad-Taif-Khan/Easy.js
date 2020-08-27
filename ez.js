@@ -16,9 +16,8 @@ const Ez = (function () {
 
     let Dom = {};
     //add properties and methods to the obj
-    //functon to create new Element;
     /**
-     * 
+     * Function to create new Element;
      * @param {string} type type or name of the element you want to create.
      * @param {object} properties attributes you want to add to.
      * @param {Array[]} children children elements you want to append.
@@ -509,8 +508,10 @@ mainLibrary.createMoreNodes = function(type,quantity=1,data=[]){
         data:data
     });
 }
+
 mainLibrary.sortHTMLContent = function (NodeList=[],options={dataType:'string',order:'a'}) {
     Dom.sortHTMLContent(NodeList,options);
 }
+
     return mainLibrary;
 })();
