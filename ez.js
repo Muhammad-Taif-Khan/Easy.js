@@ -8,7 +8,8 @@ let toRGB,
     variance,
     percentile,
     getDataSetRand,
-    randomRange;
+    randomRange,
+    replaceStringWith;
 //initialize the library
 const Ez = (function () {
 
@@ -73,6 +74,7 @@ const Ez = (function () {
         Dom.select('head').appendChild(style);
         return;
     }
+
     Dom.createMoreNodes = (type='div',options ={quantity:1,data:[]})=>{
         let nodes = [],
             i;
@@ -251,8 +253,6 @@ Dom.getContent = (node)=>{
         return Math.random() * (max - min) + min;
     }
 
-
-
     //final library
     let mainLibrary = {};
     //add properties and methods to the final library...
@@ -351,17 +351,30 @@ Dom.getContent = (node)=>{
             return;
         }
         /**
-         * Set Attribute or add new attribute to an element. if value parameter is not defined then the function will return attribute's value of name defined in the first parameter.
+         * Set `Attribute` or add new `Attribute` to an element. if value parameter is not defined then the function will return attribute's value of name defined in the first parameter.
          * @param {string} name name of the attribute.
          * @param {string} value value of the attribute.
          */
         nodeProps.attr = function (name = undefined, value = undefined) {
+            if(node.length){
+                node.forEach(nd =>{
+                    if (value === undefined && node.hasAttribute(name)) {
+                        return nd.getAttribute(name);
+                    }
+                    else if(name !== undefined && value !== undefined) {
+                        nd.setAttribute(name, value);
+                    }
+                });
+            }
+            else{
+                
             if (value === undefined && node.hasAttribute(name)) {
                 return node.getAttribute(name);
             }
             else if(name !== undefined && value !== undefined) {
                 node.setAttribute(name, value);
             }
+        }
         }
         /**
          * 
@@ -436,6 +449,15 @@ Dom.getContent = (node)=>{
             return;
         }
 
+        nodeProps.style = (cssPropertyName, cssPropertyValue)=>{
+            cssPropertyName = cssPropertyName.trim();
+            cssPropertyValue = cssPropertyValue.trim();
+            if(cssPropertyName.length > 0){
+                cssPropertyName = cssPropertyName.replace(/'-'/g,'');
+            }
+            console.log(cssPropertyName);
+        }
+        
         Object.assign(node, nodeProps);
         return node;
     };

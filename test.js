@@ -7,3 +7,5 @@ Ez.grab('body').insert(
 Ez.grab('body').insert(
     Ez.newNode('div')
 );
+
+let elm = Ez.grab('div').style('hello-world');
