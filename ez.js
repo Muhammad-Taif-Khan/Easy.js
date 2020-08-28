@@ -457,7 +457,7 @@ Dom.getContent = (node)=>{
             }
             console.log(cssPropertyName);
         }
-        
+
         Object.assign(node, nodeProps);
         return node;
     };
