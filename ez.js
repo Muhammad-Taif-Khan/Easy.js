@@ -1,4 +1,5 @@
 //define variables
+'use strict'
 let toRGB,
     random,
     mean,
@@ -449,14 +450,18 @@ Dom.getContent = (node)=>{
             return;
         }
 
-        nodeProps.style = (cssPropertyName, cssPropertyValue)=>{
-            cssPropertyName = cssPropertyName.trim();
-            cssPropertyValue = cssPropertyValue.trim();
-            if(cssPropertyName.length > 0){
-                cssPropertyName = cssPropertyName.replace(/'-'/g,'');
-            }
-            console.log(cssPropertyName);
-        }
+        // nodeProps.addStyle = (cssPropertyName, cssPropertyValue)=>{
+        //     let lastword,firstCh;
+        //     cssPropertyName = cssPropertyName.trim()
+        //     cssPropertyValue = cssPropertyValue.trim();
+        //     if(cssPropertyName.length > 0){
+
+        //         cssPropertyName = cssPropertyName.split('-');
+        //         lastword = cssPropertyName[cssPropertyName.length-1];
+        //         lastword[0] = 's';
+        //     }
+        //     console.log(lastword.split(''));
+        // }
 
         Object.assign(node, nodeProps);
         return node;
