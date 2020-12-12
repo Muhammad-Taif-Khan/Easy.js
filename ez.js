@@ -1,53 +1,64 @@
 //define variables
-'use strict'
 let toRGB,
     random,
     mean,
     median,
+    factorial,
     mode,
     stdDeviation,
     variance,
     percentile,
     getDataSetRand,
     randomRange,
-    replaceStringWith;
+    abs,
+    sigmoid;
 //initialize the library
-const Ez = (function () {
-
+/**
+* `MIT License
+* Copyright (c) 2020 Muhammad Taif Khan`
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+const Ez = (
+    () =>{
+    'use strict'
     //objects
 
     let Dom = {};
     //add properties and methods to the obj
-    /**
-     * Function to create new Element;
-     * @param {string} type type or name of the element you want to create.
-     * @param {object} properties attributes you want to add to.
-     * @param {Array[]} children children elements you want to append.
-     */
+    
     Dom.newNode = function (type, properties, children) {
         let node = document.createElement(type);
         if (properties) {
             Object.assign(node, properties);
         }
         if (children && children.length > 0) {
-            children.forEach(child => {
-                if (typeof child !== "string") {
-                    node.appendChild(child);
+            let i;
+            for (i = 0; i < children.length; i++) {
+                if (typeof children[i] !== 'string') {
+                    node.appendChild(children[i]);
                 } else {
-                    node.appendChild(document.createTextNode(child));
+                    node.appendChild(document.createTextNode(children[i]));
                 }
-            });
+            }
+
         }
         return node;
     }
 
     //select dom elements
-    /**
-     * 
-     * @param {string} type The name, id or classname of the element you want to select. 
-     * @param {*} all This indicates if you want to select a list of nodes.
-     * @param {*} location The parent node of the element you want to select. By default it is 'document'.
-     */
     Dom.select = function (type, all = false, location) {
         let node;
         if (location) {
@@ -66,92 +77,111 @@ const Ez = (function () {
         }
         return node;
     }
+
     Dom.setTitle = function (title) {
         Dom.select('title').innerText = title;
     }
+    
     Dom.setDefaultStyle = function () {
-        let style = Dom.newNode('style', {}, [`html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0; padding:0; border:0; outline:0; font-size:100%; vertical-align:baseline; background:transparent;} body {line-height: 1;}ol, ul{list-style:none;} blockquote, q{quotes:none;} blockquote:before, blockquote:after, q:before, q:after{content:'';content:none;} :focus{outline:0;} ins{text-decoration:none;} del{text-decoration:line-through;} table{border-collapse:collapse; border-spacing:0;}`,
-        ]);
-        Dom.select('head').appendChild(style);
-        return;
+        let styleSheet = document.querySelector('style');
+        let style = `html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0; padding:0; border:0; outline:0;vertical-align:baseline; background:transparent;} body {line-height: 1;}ol, ul{list-style:none;} blockquote, q{quotes:none;} blockquote:before, blockquote:after, q:before, q:after{content:'';content:none;} :focus{outline:0;} ins{text-decoration:none;}del{text-decoration:line-through;}table{border-collapse:collapse; border-spacing:0;}`;
+        if (styleSheet) {
+            styleSheet.innerText += style;
+        } else {
+            let newStyleSheet = Dom.newNode('style', {}, [style]);
+            Dom.select('head').appendChild(newStyleSheet);
+        }
     }
 
-    Dom.createMoreNodes = (type='div',options ={quantity:1,data:[]})=>{
+    Dom.createMoreNodes = (type = 'div', options = {
+        quantity: 1,
+        data: []
+    }) => {
         let nodes = [],
             i;
-        for(i =0; i< options.quantity;i++){
-           let elm = document.createElement(type);
-           if(options.data.length > 0){
-                if(options.quantity === 1 || options.quantity !== options.data.length){
+        for (i = 0; i < options.quantity; i++) {
+            let elm = document.createElement(type);
+            if (options.data.length > 0) {
+                if (options.quantity === 1 || options.quantity !== options.data.length) {
                     elm.innerText = options.data[0];
-                }else{
+                } else {
                     elm.innerText = options.data[i];
                 }
-           }
+            }
             nodes.push(elm);
         }
         return nodes;
     }
-//get html element's inner content
-Dom.getContent = (node)=>{
-    if(node.innerText && node.innerText !== ''){
-        return node.innerText;
+    //get html element's inner content
+    Dom.getContent = (node) => {
+        if (node.innerText && node.innerText !== '') {
+            return node.innerText;
+        } else if (node.value && node.value !== '') {
+            return node.value;
+        }
+        return;
     }
-    else if (node.value && node.value !== ''){
-        return node.value;
-    }
-    return;
-}
     //sort html content
 
-    Dom.sortHTMLContent = function(NodeList=[],options = {
-        dataType:'string',
-        order:'a'
-    },){
+    Dom.sortHTMLContent = function (NodeList = [], options = {
+        dataType: 'string',
+        order: 'a'
+    }, ) {
         let data = [],
             sortedData;
-      
-        if(options.dataType.toUpperCase() === 'STRING'){
-            NodeList.forEach(node =>{
-                data.push(Dom.getContent(node));
-            });
-            if(options.order.toUpperCase() === 'A'){
-                sortedData = data.sort();
+
+        if (options.dataType.toUpperCase() === 'STRING') {
+            for (let i = 0; i < NodeList.length; i++) {
+                data.push(Dom.getContent(NodeList[i]));
             }
-            else if(options.order.toUpperCase() === 'D'){
-                sortedData = data.sort((a,b)=>{
-                    if(a > b) return -1;
-                    if(a<b) return 1;
+            if (options.order.toUpperCase() === 'A') {
+                sortedData = data.sort();
+            } else if (options.order.toUpperCase() === 'D') {
+                sortedData = data.sort((a, b) => {
+                    if (a > b) return -1;
+                    if (a < b) return 1;
                     else return 0;
                 });
             }
-        }
-        else if(options.dataType.toUpperCase() === 'NUMBER'){
-            NodeList.forEach(node =>{
-                data.push(Number(Dom.getContent(node)));
-            });
-            if(options.order.toUpperCase() === 'A'){
-                sortedData = data.sort((a,b)=>{
-                    return a-b;
-                });
+        } else if (options.dataType.toUpperCase() === 'NUMBER') {
+            for (let i = 0; i < NodeList.length; i++) {
+                data.push(Number(Dom.getContent(NodeList[i])));
             }
-            else if(options.order.toUpperCase() === 'D'){
-                sortedData = data.sort((a,b)=>{
-                    return b-a;
+            if (options.order.toUpperCase() === 'A') {
+                sortedData = data.sort((a, b) => {
+                    return a - b;
+                });
+            } else if (options.order.toUpperCase() === 'D') {
+                sortedData = data.sort((a, b) => {
+                    return b - a;
                 });
             }
         }
-        NodeList.forEach((node,i) =>{
+        for (let i = 0; i < NodeList.length; i++) {
             NodeList[i].innerText = data[i];
-        });
-        return;
+        }
     }
+    //functions -> Maths
+    abs = (x)=>{
+        return Math.abs(x);
+    }
+    /**
+     * The `sigmoid` function returns the sigmoid of a number `x` given.
+     * @param {Number} x A number.
+     */
+    sigmoid = function (x) {
+        return 1 / (1 + Math.exp(-x));
+    }
+
+
     // functions
+
     mean = function (array) {
         let mean = 0;
-        array.forEach(elm => {
-            mean += elm;
-        });
+        for (let i = 0; i < array.length; i++) {
+
+            mean += array[i];
+        }
         return mean / array.length;
     }
 
@@ -165,18 +195,34 @@ Dom.getContent = (node)=>{
         }
         return sortedArr[midIdx];
     }
+    factorial = function (num = 0) {
+        if (typeof num !== 'number') {
+            throw new Error('You must enter a number to find the factorial of!');
+        }
+        if (num === 1) {
+            return num
+        }
+        if (num === 0) {
+            return 1;
+        }
+        if (num < 0) {
+            throw new Error('Please enter a positive number for the factorial!');
+        }
+        return num * factorial(num - 1);
+    }
+
     /**
      * This function return maximum repeated number in array.
-     * @returns Array[ ]
+     * @returns `Array[ Number ]`
      */
     mode = function (array = []) {
         let modeObj = {},
             maxFrequency = 0,
             modes = [];
-        array.forEach(num => {
-            if (!modeObj[num]) modeObj[num] = 0;
-            modeObj[num]++;
-        });
+        for (let i = 0; i < array.length; i++) {
+            if (!modeObj[array[i]]) modeObj[array[i]] = 0;
+            modeObj[array[i]]++;
+        }
         for (let num in modeObj) {
             if (modeObj[num] > maxFrequency) {
                 modes = [num];
@@ -188,12 +234,13 @@ Dom.getContent = (node)=>{
     }
 
     stdDeviation = function (array) {
-        let Mean = mean(array);
-        let squared = [];
-        array.forEach(elm => {
-            let sub = elm - Mean;
+        let Mean = mean(array),
+            squared = [];
+        for (let i = 0; i < array.length; i++) {
+            let sub = array[i] - Mean;
             squared.push(sub * sub);
-        });
+
+        }
         return Math.sqrt(mean(squared));
     }
     /**
@@ -306,9 +353,9 @@ Dom.getContent = (node)=>{
                     node[index].style.display = 'none';
                     return;
                 }
-                node.forEach(nd => {
-                    nd.style.display = 'none';
-                });
+                for (let i = 0; i < node.length; i++) {
+                    node[i].style.display = 'none';
+                }
             }
         }
         /**
@@ -326,9 +373,9 @@ Dom.getContent = (node)=>{
                     node[index].style.display = type;
                     return;
                 }
-                node.forEach(nd => {
-                    nd.style.display = type;
-                });
+                for (let i = 0; i < node.length; i++) {
+                    node[i].style.display = type;
+                }
             }
             return;
         }
@@ -345,9 +392,9 @@ Dom.getContent = (node)=>{
                     node[index].parentNode.removeChild(node[index]);
                     return;
                 }
-                node.forEach(nd => {
-                    nd.parentNode.removeChild(nd);
-                });
+                for (let i = 0; i < node.length; i++) {
+                    node[i].parentNode.removeChild(node[i]);
+                }
             }
             return;
         }
@@ -357,45 +404,37 @@ Dom.getContent = (node)=>{
          * @param {string} value value of the attribute.
          */
         nodeProps.attr = function (name = undefined, value = undefined) {
-            if(node.length){
-                node.forEach(nd =>{
-                    if (value === undefined && node.hasAttribute(name)) {
-                        return nd.getAttribute(name);
+            if (node.length) {
+                for (let i = 0; i < node.length; i++) {
+                    if (value === undefined && node[i].hasAttribute(name)) {
+                        return node[i].getAttribute(name);
+                    } else if (name !== undefined && value !== undefined) {
+                        node[i].setAttribute(name, value);
                     }
-                    else if(name !== undefined && value !== undefined) {
-                        nd.setAttribute(name, value);
-                    }
-                });
+                }
+            } else {
+                if (value === undefined && node.hasAttribute(name)) {
+                    return node.getAttribute(name);
+                } else if (name !== undefined && value !== undefined) {
+                    node.setAttribute(name, value);
+                }
             }
-            else{
-                
-            if (value === undefined && node.hasAttribute(name)) {
-                return node.getAttribute(name);
-            }
-            else if(name !== undefined && value !== undefined) {
-                node.setAttribute(name, value);
-            }
+            return node;
         }
-        }
-        /**
-         * 
-         * @param {string} event 
-         * @param {function} callback 
-         * @param {boolean} boolean 
-         */
+
         nodeProps.on = function (event, callback, boolean = false) {
             node.attachEvent ? node.attachEvent(event, callback, boolean) : node.addEventListener(event, callback, boolean);
         }
 
         nodeProps.onAll = function (event, callback, boolean = false) {
             if (node.length) {
-                node.forEach(nd => {
-                    if (nd.addEventListener) {
-                        nd.addEventListener(event, callback, boolean);
-                    } else if (nd.attachEvent) {
-                        nd.attachEvent(event, callback, boolean);
+                for (let i = 0; i < node.length; i++) {
+                    if (node[i].addEventListener) {
+                        node[i].addEventListener(event, callback, boolean);
+                    } else if (node[i].attachEvent) {
+                        node[i].attachEvent(event, callback, boolean);
                     }
-                });
+                }
             } else {
                 console.error('onAll() method does not work on a single node. it noly works with nodelist!');
             }
@@ -405,95 +444,119 @@ Dom.getContent = (node)=>{
          * @param {Node} Element Html Element or Node to be inserted.
          * @param {boolean} removeInsideData remove the data of target ndoe.
          */
-        nodeProps.insert = (Element,removeInsideData = false)=>{
-         if(removeInsideData){
-             node.innerText = '';
-             node.appendChild(Element);
-             return;
-         }
-         node.appendChild(Element);
-        };
-
-        nodeProps.addClass= (name)=>{
-            if(node.length && name){
-                node.forEach(nd =>{
-                    nd.classList.add(name);
-                });
-                return;
-            }
-           if(name) node.classList.add(name);
-        }
-
-        nodeProps.removeClass=(name="")=>{
-            let presentClass = node.className;
-                presentClass = presentClass.split(' ');
-            presentClass.forEach(cls =>{
-                if(cls === name){
-                    presentClass.splice(presentClass.indexOf(name),1);
+        nodeProps.insert = (Elements, removeInsideData = false) => {
+            if (Elements.length) {
+                for (let i = 0; i < Elements.length; i++) {
+                    node.appendChild(Elements[i]);
                 }
-            });
-
-            node.className = presentClass.join('');
-            return;
-        }
-
-        nodeProps.toggleClass = (name="",boolean)=>{
-            if(name !== undefined && name.length > 0){
-                if(node.length){
-                    node.forEach(nd =>{
-                        nd.classList.toggle(name,boolean);
-                    });
+            } else {
+                if (removeInsideData) {
+                    node.innerText = '';
+                    node.appendChild(Elements);
                     return;
                 }
-                node.classList.toggle(name,boolean);
+                node.appendChild(Elements);
             }
-            return;
+        };
+
+        nodeProps.hasClass = (name = '') => {
+            if (typeof name !== 'string') {
+                throw new Error('The class name should be string!');
+            }
+            if (name.length === 0) {
+                throw new Error('You forgot to give the class\'' + ' name parameter to the function Node.hasClass(name)!');
+            }
+            name = name.trim();
+            if (node.className.split(' ').includes(name)) {
+                return true;
+            }
+            return false;
         }
 
-        // nodeProps.addStyle = (cssPropertyName, cssPropertyValue)=>{
-        //     let lastword,firstCh;
-        //     cssPropertyName = cssPropertyName.trim()
-        //     cssPropertyValue = cssPropertyValue.trim();
-        //     if(cssPropertyName.length > 0){
+        nodeProps.addClass = (name) => {
+            if (node.length && name && typeof name === 'string') {
+                for (let i = 0; i < node.length; i++) {
+                    node[i].classList.add(name);
+                }
+            } else if (name && typeof name === 'string') node.classList.add(name);
 
-        //         cssPropertyName = cssPropertyName.split('-');
-        //         lastword = cssPropertyName[cssPropertyName.length-1];
-        //         lastword[0] = 's';
-        //     }
-        //     console.log(lastword.split(''));
-        // }
+            return node;
+        }
+
+        nodeProps.removeClass = (name = "") => {
+            // let presentClass = node.className;
+            //     presentClass = presentClass.split(' ');
+            if (node.length) {
+                for (let i = 0; i < node.length; i++) {
+                    if (node[i].className.split(' ').includes(name)) {
+                        node[i].classList.remove(name);
+                    }
+                }
+            } else {
+                if (node.className.split(' ').includes(name)) {
+                    node.classList.remove(name);
+                }
+            }
+            return node;
+        }
+
+        nodeProps.toggleClass = (name = "", boolean = true) => {
+            if (name !== undefined && name.length > 0) {
+                if (node.length) {
+                    for (let i = 0; i < node.length; i++) {
+                        node[i].classList.toggle(name, boolean);
+                    }
+                } else {
+                    node.classList.toggle(name, boolean);
+                }
+            }
+        }
+
+        nodeProps.addStyle = (cssPropertyName = '', cssPropertyValue = '', refrence = node.localName) => {
+            if (cssPropertyValue.length === 0 || cssPropertyName.length === 0) {
+                return false;
+            }
+            let styleSheet = document.querySelector('style'),
+                isRepeated = false;
+            if (refrence.toUpperCase() === "CLASS") {
+                refrence = "." + node.className.split(' ')[0];
+            } else if (refrence.toUpperCase() === "ID") {
+                refrence = "#" + node.id.split(' ')[0];
+            }
+            if (styleSheet) {
+                let splited = styleSheet.innerText.split('}');
+                splited.pop();
+                if (styleSheet.innerText.includes(node.localName)) {
+                    for (let i = 0; i < splited.length; i++) {
+                        if (splited[i].includes(node.localName) && !isRepeated) {
+                            isRepeated = true;
+                            splited[i] += cssPropertyName + ":" + cssPropertyValue + ";";
+                        }
+                    }
+                }
+                if (!styleSheet.innerText.includes(node.localName)) {
+                    let newStyle = " " + refrence + "{" + cssPropertyName + ":" + cssPropertyValue + ";";
+                    splited.push(newStyle);
+                }
+                splited[splited.length - 1] += "}";
+                styleSheet.innerText = splited.join('}');
+            } else if (!styleSheet) {
+                let newStyleSheet = document.createElement('style');
+                let newStyle = " " + refrence + "{" + cssPropertyName + " : " + cssPropertyValue + ";}";
+                newStyleSheet.innerText = newStyle;
+                document.querySelector('head').appendChild(newStyleSheet);
+            }
+            return node;
+        }
+        nodeProps.getParent = ()=>{
+            if(node.parentNode && !node.length){
+                return node.parentNode;
+            }
+        }
 
         Object.assign(node, nodeProps);
         return node;
     };
-
-    let _multimedia = {};
-
-    _multimedia.audio = (src, volume) => {
-        let audio = new Audio(src);
-        audio.volume = volume;
-        audio.play();
-        return audio;
-    }
-
-    _multimedia.img = (src, width, height) => {
-        let analyze = src.split('.');
-        let ext = analyze[analyze.length - 1].toUpperCase();
-        if (ext === "JPEG" || ext === "JPG" || ext === "PNG" || ext === "GIF") {
-            let img = new Image(width, height);
-            img.src = src;
-            img.onerror = function () {
-                console.error('Error occured when loading the img. It may be you typed img source that not found on your pc.');
-                return undefined;
-            }
-            return img;
-        };
-        console.error('You typed invalid image extension!')
-        return undefined;
-    }
-
-    Object.assign(mainLibrary,_multimedia);
-
     mainLibrary.setDefaultStyle = function () {
         Dom.setDefaultStyle();
     }
@@ -509,36 +572,123 @@ Dom.getContent = (node)=>{
      * @param {string} fileName String that will be used as filename. 
      */
 
-    mainLibrary.saveAsHTMLFile = (fileName)=>{
+    mainLibrary.saveAsHTMLFile = (fileName) => {
+        if (typeof fileName !== "string") return;
         let data = Dom.select('html').outerHTML;
-        let blobFile = new Blob([data],{type:'text/plain'});
-        let a = Dom.newNode('a',{href:window.webkitURL.createObjectURL(blobFile),download:fileName+'.html'});
-        
+        let blobFile = new Blob([data], {
+            type: 'text/plain'
+        });
+        let a = Dom.newNode('a', {
+            href: window.webkitURL.createObjectURL(blobFile),
+            download: fileName + '.html'
+        });
+
         document.body.appendChild(a);
         a.click();
         a.parentNode.removeChild(a);
     }
-    
-//check if the url is valid
-mainLibrary.isValidURL = function(url){
-     let regex =  /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
-     if(regex.test(url)) return true;
-    return false;
-}
-mainLibrary.getContent = function(node){
-    return Dom.getContent(node);
-}
 
-mainLibrary.createMoreNodes = function(type,quantity=1,data=[]){
-    return Dom.createMoreNodes(type,{
-        quantity:quantity,
-        data:data
-    });
-}
+    //check if the url is valid
+    mainLibrary.isValidURL = function (url) {
+        if (typeof url !== "string") return;
+        let regex = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+        if (regex.test(url)) return true;
+        return false;
+    }
 
-mainLibrary.sortHTMLContent = function (NodeList=[],options={dataType:'string',order:'a'}) {
-    Dom.sortHTMLContent(NodeList,options);
+    /**
+     * `Ez.getContent()` returns the inner content or data of an element.
+     * @param {string} node HTML element to get content of.
+     */
+    mainLibrary.getContent = function (node) {
+        return Dom.getContent(node);
+    }
+
+    mainLibrary.createMoreNodes = function (type, quantity = 1, data = []) {
+        return Dom.createMoreNodes(type, {
+            quantity: quantity,
+            data: data
+        });
+    }
+
+    mainLibrary.sortHTMLContent = function (NodeList = [], options = {
+        dataType: 'string',
+        order: 'a'
+    }) {
+        Dom.sortHTMLContent(NodeList, options);
+    }
+
+    //---------------
+    //Array's Functions...
+    //---------------
+
+    /**
+     * `Ez.filter()` method filter the provided `array` for a specific condition returned by the `callback` function.
+     *This method does not change the original array.
+     * @param {Array} array Array to be filtered.
+     * @param {Function} callback A function that check a specific condition for each of the element of an Array.
+     * @returns `array`
+     */
+    mainLibrary.filter = (array, callback)=>{
+        if(Array.isArray(array) && array !== undefined){
+            let filteredArray = [];
+            for(let i = 0; i< array.length; i++){
+                if(callback(array[i],i,array)){
+                    filteredArray.push(array[i]);
+                }
+            }
+           return filteredArray;
+        }
+        console.error('In Ez.filter() method the first paramater is either undefined or not an array!');
+    }
+
+
+    /**
+     * The `map` function call a function for each element of an array.
+     * Does not change the original array.
+     * @param {Array[]} array The Array to be manipulated.
+     * @param {function} func The callback function to call for each Element of the Array.
+     * @returns `Array[]`
+     */
+    mainLibrary.map = (array, func) => {
+        if (!Array.isArray(array) ||array === undefined) {
+            console.error('In Ez.map() method the first paramater is either undefined or not an array!');
+            return;
+        }
+        let newArray = [];
+        for(let i = 0; i< array.length;i++){
+            newArray.push(array[i]);
+        }
+        for (let i = 0; i < newArray.length; i++) {
+            newArray[i] = func(newArray[i], i, newArray);
+
+        }
+        return newArray;
+    };
+    /**
+     * This function converts an Array to an Object.
+     * @param {Array[]} array Array that will be converted to an Object.
+     */
+mainLibrary.toObject = (array=[])=>{
+    if(!Array.isArray(array)){
+        throw new Error('You must enter an Array to convert it to Object');
+    }
+    let obj = {};
+    for (let i = 0; i < array.length; i++) {
+        obj[array[i]] = array[i];
+    }
+    return obj;
 }
+    /**
+     * `Ez.Easy` Object  that holds all the information about the Library.
+     */
+    mainLibrary.Easy = {
+        name: "Easy.js|Ez.js",
+        version: "20.8.01",
+        creator: "Muhammad Taif Khan",
+        firstLaunch: '1/8/2020',
+        support: 'frontend'
+    };
 
     return mainLibrary;
 })();
